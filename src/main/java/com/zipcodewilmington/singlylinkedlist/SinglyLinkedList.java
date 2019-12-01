@@ -9,7 +9,7 @@ import java.util.List;
 public class SinglyLinkedList<D> {
 
     //State
-    private Node<D> zeroIndexNode;
+    private Node<D> zeroIndexNode = getNode(0);
     private final IdGenerator id = new IdGenerator();
     private Integer size = 0;
     private Node<D> endNode = getNode(size - 1);
@@ -21,10 +21,20 @@ public class SinglyLinkedList<D> {
 
     //SinglyLinkedList Class Methods
     public void add(D newElement){
-        Node<D> addedNode = (size > 0) ? new Node(this.endNode, newElement) : makeZeroIndexNode(newElement);
+        new Node(size,newElement);
         size++;
     }
 
+    public void remove(Integer index){
+        Node<D> nodeToRemove = getNode(index);
+        Node<D> prevNode = nodeToRemove.prevNode;
+        Node<D> nextNode = nodeToRemove.nextNode;
+        nodeToRemove.decrementAllIndecesAfter(nodeToRemove);
+        prevNode.setNextNode(nextNode);
+        nextNode.setPrevNode(prevNode);
+        size--;
+    }
+/*
     public Node makeZeroIndexNode(D element){
         Node<D> zeroNode = new Node(0, element);
         zeroIndexNode = zeroNode;
@@ -32,23 +42,25 @@ public class SinglyLinkedList<D> {
         return zeroNode;
 }
 
+ */
+
     public Node getNode(Integer index){
         Node<D> nodeToCheck = zeroIndexNode;
-
         for(int i = 0; i < size; i++) {
-            if (nodeToCheck.getIndex() == index) {
-                return nodeToCheck;
-            } else {
-                nodeToCheck = nodeToCheck.getNextNode();
-            }
+            if (nodeToCheck.getIndex() == index) { return nodeToCheck; }
+            else { nodeToCheck = nodeToCheck.getNextNode(); }
         }
         return null;
     }
+
+
 
     public D get(Integer index){
         Node<D> from = getNode(index);
         return (from == null) ? null : from.getValue();
     }
+
+    public Integer size(){ return size; }
 
 
 
@@ -75,16 +87,14 @@ public class SinglyLinkedList<D> {
 
     //Private Class Node
     private class Node<D> {
-        private Node<D> prevNode;
-        private Node<D> nextNode;
         private Integer index;
+        private Node<D> prevNode = getNode(index -1);
+        private Node<D> nextNode = getNode(index + 1);
         private Integer uniqueId;
         private D value;
 
         //Node Constructors
         public Node(Integer index, D element) {
-            prevNode = SinglyLinkedList.this.getNode(index - 1);
-            nextNode = SinglyLinkedList.this.getNode(index + 1);
             this.index = index;
             uniqueId = id.next();
             value = element;
@@ -106,6 +116,15 @@ public class SinglyLinkedList<D> {
                 Node node = current.nextNode;
                 Integer nodeIndex = node.getIndex();
                 node.setIndex(nodeIndex + 1);
+                incrementAllIndecesAfter(node);
+            }
+        }
+
+        public void decrementAllIndecesAfter(Node<D> current){
+            if(current.getNextNode() != null){
+                Node node = current.nextNode;
+                Integer nodeIndex = node.getIndex();
+                node.setIndex(nodeIndex - 1);
                 incrementAllIndecesAfter(node);
             }
         }
